@@ -1,0 +1,190 @@
+﻿@model DineLeb.WebMvc.Models.RestaurantDetailsViewModel
+@{
+    ViewData["Title"] = Model.Restaurant.Name;
+    var googleMapsUrl = (Model.Restaurant.Latitude.HasValue && Model.Restaurant.Longitude.HasValue)
+        ? $"https://www.google.com/maps/search/?api=1&query={Model.Restaurant.Latitude},{Model.Restaurant.Longitude}"
+        : $"https://www.google.com/maps/search/?api=1&query={Uri.EscapeDataString(Model.Restaurant.Name + " " + Model.Restaurant.Address + " " + Model.Restaurant.City + " Lebanon")}";
+}
+
+<div class="container my-4">
+    <!-- Restaurant Header Card -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                    <h1 class="fw-bold mb-0">@Model.Restaurant.Name</h1>
+                    @if (Model.Restaurant.IsVerified)
+                    {
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill">
+                            <i class="bi bi-patch-check-fill me-1"></i>Verified Commercial Entity
+                        </span>
+                    }
+                    @if (Model.Restaurant.IsSubscribed)
+                    {
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 rounded-pill">
+                            <i class="bi bi-gem me-1"></i>Pro Partner
+                        </span>
+                    }
+                </div>
+
+                <!-- Clickable Google Maps Location Link -->
+                <a href="@googleMapsUrl" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-muted d-inline-flex align-items-center gap-1 mb-2" title="Open exact pin in Google Maps">
+                    <i class="bi bi-geo-alt-fill text-danger"></i>
+                    <span class="text-decoration-underline">@Model.Restaurant.Address, @Model.Restaurant.City</span>
+                    <span class="badge bg-light text-dark border ms-1"><i class="bi bi-box-arrow-up-right me-1"></i>Google Maps</span>
+                </a>
+
+                <p class="text-muted mb-0">@Model.Restaurant.Description</p>
+            </div>
+
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <div class="d-inline-block bg-light border rounded-4 px-4 py-3 text-center">
+                    <div class="display-6 fw-bold text-warning mb-0">
+                        <i class="bi bi-star-fill me-1"></i>@Model.Restaurant.AverageRating.ToString("0.0")
+                    </div>
+                    <small class="text-muted d-block">Based on @Model.Restaurant.ReviewCount verified reviews</small>
+                    <small class="text-success fw-semibold d-block mt-1">
+                        <i class="bi bi-shield-check me-1"></i>@Model.Restaurant.ResolvedTicketsCount / @Model.Restaurant.TotalTicketsCount Disputes Resolved
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["ReviewSuccess"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 mb-4">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["ReviewSuccess"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["TicketSuccess"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show rounded-3 mb-4">
+            <i class="bi bi-envelope-check-fill me-2"></i>@TempData["TicketSuccess"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- Public Diner Reviews -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <h4 class="fw-bold mb-3"><i class="bi bi-chat-quote-fill text-danger me-2"></i>Public Diner Reviews</h4>
+
+                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    <form asp-action="AddReview" method="post" class="bg-light p-3 rounded-3 border mb-4">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="restaurantId" value="@Model.Restaurant.Id" />
+                        <div class="row g-2 align-items-center mb-2">
+                            <div class="col-auto">
+                                <label class="form-label small fw-semibold mb-0">Rating:</label>
+                            </div>
+                            <div class="col-auto">
+                                <select name="rating" class="form-select form-select-sm rounded-3">
+                                    <option value="5">5 - Excellent</option>
+                                    <option value="4">4 - Very Good</option>
+                                    <option value="3">3 - Average</option>
+                                    <option value="2">2 - Poor</option>
+                                    <option value="1">1 - Terrible</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <textarea name="comment" rows="2" class="form-control rounded-3" placeholder="Share your dining experience..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-dark btn-sm rounded-pill px-4">Post Verified Review</button>
+                    </form>
+                }
+                else
+                {
+                    <div class="alert alert-light border text-muted small mb-4">
+                        Please <a asp-controller="Account" asp-action="Login">Sign In</a> to write a review.
+                    </div>
+                }
+
+                @if (!Model.Restaurant.Reviews.Any())
+                {
+                    <p class="text-muted small">No public reviews yet. Be the first to review!</p>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var review in Model.Restaurant.Reviews)
+                        {
+                            <div class="border-bottom pb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong class="me-2">@review.CustomerId</strong>
+                                        <span class="text-warning small">
+                                            @for (int i = 0; i < review.Rating; i++)
+                                            {
+                                                <i class="bi bi-star-fill"></i>
+                                            }
+                                        </span>
+                                    </div>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <form asp-action="DeleteReview" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="reviewId" value="@review.Id" />
+                                            <input type="hidden" name="restaurantId" value="@Model.Restaurant.Id" />
+                                            <button type="submit" class="btn btn-link text-danger btn-sm p-0">Delete</button>
+                                        </form>
+                                    }
+                                </div>
+                                <p class="mb-1 mt-1 text-dark">@review.Comment</p>
+                                <small class="text-muted">@review.CreatedAt.ToString("MMM dd, yyyy - hh:mm tt")</small>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Private Dispute Resolution -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <h4 class="fw-bold mb-2"><i class="bi bi-lock-fill text-danger me-2"></i>Private Dispute Resolution</h4>
+                <p class="text-muted small mb-3">
+                    Have an issue with hygiene, overcharging, or service? Submit a confidential ticket directly to the restaurant leadership without public shaming.
+                </p>
+
+                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    <form asp-action="AddTicket" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="restaurantId" value="@Model.Restaurant.Id" />
+
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold">Issue Category</label>
+                            <select name="category" class="form-select rounded-3" asp-items="Html.GetEnumSelectList<DineLeb.Domain.Enums.TicketCategory>()"></select>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold">Subject</label>
+                            <input type="text" name="title" class="form-control rounded-3" placeholder="e.g. Overcharged on bill" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Details</label>
+                            <textarea name="description" rows="3" class="form-control rounded-3" placeholder="Describe what happened..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-100 rounded-pill fw-semibold">
+                            <i class="bi bi-send-fill me-1"></i>Send Private Ticket
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <div class="p-3 bg-light border rounded-3 text-center text-muted small">
+                        <i class="bi bi-info-circle me-1"></i>Sign in as a Diner to file private complaints.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,212 @@
+﻿@model DineLeb.WebMvc.Models.RestaurantDashboardViewModel
+@{
+    ViewData["Title"] = $"{Model.Restaurant.Name} - Operations Portal";
+
+    var totalTickets = Model.Restaurant.TotalTicketsCount;
+    var resolvedTickets = Model.Restaurant.ResolvedTicketsCount;
+    var pendingTickets = totalTickets - resolvedTickets;
+    if (pendingTickets < 0) pendingTickets = 0;
+
+    var resolutionRate = totalTickets > 0 ? (int)Math.Round((double)resolvedTickets / totalTickets * 100) : 100;
+
+    string badgeClass;
+    string badgeText;
+    if (resolutionRate >= 85 && Model.Restaurant.AverageRating >= 4.0)
+    {
+        badgeClass = "bg-success text-white";
+        badgeText = "Top Tier Trust";
+    }
+    else if (resolutionRate >= 50)
+    {
+        badgeClass = "bg-warning text-dark";
+        badgeText = "Good Standing";
+    }
+    else
+    {
+        badgeClass = "bg-danger text-white";
+        badgeText = "Action Required";
+    }
+}
+
+<div class="container my-4">
+    <!-- Header -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill">
+                        <i class="bi bi-shield-check me-1"></i>Internal Operations Portal
+                    </span>
+                    <span class="badge @badgeClass px-3 py-1 rounded-pill">
+                        <i class="bi bi-award-fill me-1"></i>@badgeText
+                    </span>
+                </div>
+                <h2 class="fw-bold mb-1">@Model.Restaurant.Name</h2>
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-geo-alt me-1 text-danger"></i>@Model.Restaurant.Address, @Model.Restaurant.City
+                    <span class="mx-2">•</span>
+                    <i class="bi bi-telephone me-1"></i>@Model.Restaurant.PhoneNumber
+                </p>
+            </div>
+            <div>
+                <a asp-action="Details" asp-route-id="@Model.Restaurant.Id" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                    <i class="bi bi-eye me-1"></i>View Public Profile
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["DashboardSuccess"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["DashboardSuccess"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Analytics KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold">Dispute Resolution Rate</span>
+                    <span class="badge bg-success-subtle text-success rounded-circle p-2"><i class="bi bi-percent fs-6"></i></span>
+                </div>
+                <div class="h3 fw-bold text-dark mb-1">@resolutionRate%</div>
+                <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: @resolutionRate%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold">Average Public Rating</span>
+                    <span class="badge bg-warning-subtle text-warning rounded-circle p-2"><i class="bi bi-star-fill fs-6"></i></span>
+                </div>
+                <div class="h3 fw-bold text-warning mb-1">
+                    @Model.Restaurant.AverageRating.ToString("0.0") <small class="text-muted fs-6">/ 5.0</small>
+                </div>
+                <small class="text-muted">Based on @Model.Restaurant.ReviewCount verified reviews</small>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold">Resolved Disputes</span>
+                    <span class="badge bg-info-subtle text-info rounded-circle p-2"><i class="bi bi-check2-circle fs-6"></i></span>
+                </div>
+                <div class="h3 fw-bold text-dark mb-1">@resolvedTickets</div>
+                <small class="text-success"><i class="bi bi-shield-check me-1"></i>Successfully mitigated</small>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold">Pending Attention</span>
+                    <span class="badge bg-danger-subtle text-danger rounded-circle p-2"><i class="bi bi-exclamation-triangle fs-6"></i></span>
+                </div>
+                <div class="h3 fw-bold text-danger mb-1">@pendingTickets</div>
+                <small class="text-muted">Open dispute cases</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Private Tickets Section -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-danger">
+                <i class="bi bi-envelope-exclamation-fill me-2"></i>Private Diner Dispute Tickets (@Model.Tickets.Count)
+            </h5>
+            <small class="text-muted">Confidential tickets sent by diners</small>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr class="small text-muted text-uppercase">
+                        <th>Ticket / Issue</th>
+                        <th>Category</th>
+                        <th>Diner Contact</th>
+                        <th>Submitted</th>
+                        <th>Status</th>
+                        <th class="text-end pe-3">Resolution Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Tickets.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted small">No dispute tickets logged for this restaurant yet.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var ticket in Model.Tickets)
+                        {
+                            <tr>
+                                <td>
+                                    <strong class="text-dark d-block">@ticket.Title</strong>
+                                    <p class="text-muted small mb-0" style="max-width: 320px;">@ticket.Description</p>
+                                    @if (!string.IsNullOrEmpty(ticket.OwnerResolutionNotes))
+                                    {
+                                        <div class="mt-1 small text-success bg-success-subtle p-2 rounded-2">
+                                            <strong>Resolution Note:</strong> @ticket.OwnerResolutionNotes
+                                        </div>
+                                    }
+                                </td>
+                                <td><span class="badge bg-light text-dark border">@ticket.Category</span></td>
+                                <td><small class="text-muted">@ticket.CustomerId</small></td>
+                                <td><small class="text-muted">@ticket.CreatedAt.ToString("MMM dd, yyyy")</small></td>
+                                <td>
+                                    @if (ticket.Status == DineLeb.Domain.Enums.TicketStatus.Resolved)
+                                    {
+                                        <span class="badge bg-success-subtle text-success px-2 py-1 rounded-pill">Resolved</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger px-2 py-1 rounded-pill">Open</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-3">
+                                    <div class="d-inline-flex align-items-center gap-2">
+                                        @if (ticket.Status != DineLeb.Domain.Enums.TicketStatus.Resolved)
+                                        {
+                                            <form asp-action="ResolveTicket" method="post" class="d-inline-flex gap-2">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="ticketId" value="@ticket.Id" />
+                                                <input type="hidden" name="restaurantId" value="@Model.Restaurant.Id" />
+                                                <input type="text" name="resolutionNotes" class="form-control form-control-sm" placeholder="Resolution explanation..." required />
+                                                <button type="submit" class="btn btn-success btn-sm rounded-pill text-nowrap px-3 fw-semibold">
+                                                    <i class="bi bi-check-lg me-1"></i>Resolve
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-muted"><i class="bi bi-check2-all text-success me-1"></i>Closed</small>
+                                        }
+
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <form asp-action="DeleteTicket" method="post" class="d-inline" onsubmit="return confirm('Moderation: Are you sure you want to permanently delete this abusive dispute ticket?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="ticketId" value="@ticket.Id" />
+                                                <input type="hidden" name="restaurantId" value="@Model.Restaurant.Id" />
+                                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-2" title="Delete Abusive Ticket (Admin)">
+                                                    <i class="bi bi-trash3"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

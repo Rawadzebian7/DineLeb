@@ -1,0 +1,64 @@
+﻿@model DineLeb.WebMvc.Models.RegisterDinerViewModel
+@{
+    ViewData["Title"] = "Create Diner Account";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill mb-2">Verified Diner Experience</span>
+                    <h2 class="fw-bold text-dark">Join DineLeb</h2>
+                    <p class="text-muted small">Create an authentic profile to leave verified reviews and submit private resolution tickets directly to Lebanese restaurant management.</p>
+                </div>
+
+                <form asp-action="Register" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label fw-semibold small text-muted"></label>
+                        <input asp-for="FullName" class="form-control form-control-lg rounded-3" placeholder="e.g. Jad El Hage" />
+                        <span asp-validation-for="FullName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-semibold small text-muted"></label>
+                        <input asp-for="Email" class="form-control form-control-lg rounded-3" placeholder="name@example.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PhoneNumber" class="form-label fw-semibold small text-muted"></label>
+                        <input asp-for="PhoneNumber" class="form-control form-control-lg rounded-3" placeholder="+961 70 123456" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label fw-semibold small text-muted"></label>
+                        <input asp-for="Password" class="form-control form-control-lg rounded-3" placeholder="At least 6 characters" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="ConfirmPassword" class="form-label fw-semibold small text-muted"></label>
+                        <input asp-for="ConfirmPassword" class="form-control form-control-lg rounded-3" placeholder="Confirm your password" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark btn-lg w-100 rounded-3 fw-semibold mb-3">Register as Diner</button>
+
+                    <div class="text-center">
+                        <span class="text-muted small">Already registered? </span>
+                        <a asp-action="Login" class="text-decoration-none fw-semibold small text-primary">Sign In</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,261 @@
+﻿@model DineLeb.WebMvc.Models.RegisterRestaurantViewModel
+@{
+    ViewData["Title"] = "List Your Restaurant";
+}
+
+<div class="container my-5" style="max-width: 800px;">
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="text-center mb-4">
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 rounded-pill mb-2">
+                <i class="bi bi-shop me-1"></i>Partner Onboarding
+            </span>
+            <h2 class="fw-bold">List Your Restaurant on DineLeb</h2>
+            <p class="text-muted">Register your commercial establishment and search or paste your exact location in Lebanon.</p>
+        </div>
+
+        <form asp-action="Register" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Name" class="form-label fw-semibold small"></label>
+                    <input asp-for="Name" class="form-control rounded-3" placeholder="e.g. Em Sherif Cafe" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="City" class="form-label fw-semibold small"></label>
+                    <input asp-for="City" class="form-control rounded-3" placeholder="e.g. Beirut, Byblos, Tripoli" />
+                    <span asp-validation-for="City" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Address" class="form-label fw-semibold small"></label>
+                    <input asp-for="Address" class="form-control rounded-3" placeholder="e.g. Ashrafieh, Monot Street" />
+                    <span asp-validation-for="Address" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="PhoneNumber" class="form-label fw-semibold small"></label>
+                    <input asp-for="PhoneNumber" class="form-control rounded-3" placeholder="+961 1 000 000" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="Description" class="form-label fw-semibold small"></label>
+                    <textarea asp-for="Description" rows="2" class="form-control rounded-3" placeholder="Authentic Lebanese cuisine, seafood, grills..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+
+                <!-- Interactive Lebanon Pin Map with Autocomplete + Google Maps Link Support -->
+                <div class="col-12">
+                    <label class="form-label fw-semibold small">
+                        <i class="bi bi-geo-alt-fill text-danger me-1"></i>Search Restaurant/Street OR Paste Google Maps Link
+                    </label>
+
+                    <div class="position-relative mb-2">
+                        <div class="input-group">
+                            <input type="text" id="mapSearchInput" class="form-control rounded-start-3" autocomplete="off"
+                                   placeholder="Type place/street (e.g., Niha, Mar Mikhael, Hamra) or paste Google Maps URL..." />
+                            <button type="button" id="mapSearchBtn" class="btn btn-dark rounded-end-3 px-3">
+                                <i class="bi bi-search me-1"></i>Locate
+                            </button>
+                        </div>
+                        <div id="searchResultsDropdown" class="list-group position-absolute w-100 shadow-lg rounded-3 mt-1" style="z-index: 1050; display: none; max-height: 220px; overflow-y: auto;"></div>
+                    </div>
+
+                    <small class="text-muted d-block mb-2" id="searchStatus"></small>
+
+                    <div id="locationPickerMap" style="height: 290px; border-radius: 12px; border: 1px solid #dee2e6; z-index: 1;"></div>
+                    <small class="text-muted d-block mt-1" id="coordsDisplay">Type to search, paste a Google Maps link, or drag the pin.</small>
+
+                    <input type="hidden" asp-for="Latitude" id="Latitude" />
+                    <input type="hidden" asp-for="Longitude" id="Longitude" />
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="CommercialRegisterNumber" class="form-label fw-semibold small"></label>
+                    <input asp-for="CommercialRegisterNumber" class="form-control rounded-3" placeholder="e.g. 1048291-Beirut" />
+                    <span asp-validation-for="CommercialRegisterNumber" class="text-danger small"></span>
+                </div>
+
+                <hr class="my-3" />
+                <h6 class="fw-bold text-dark mb-1">Owner Portal Credentials</h6>
+
+                <div class="col-md-6">
+                    <label asp-for="OwnerEmail" class="form-label fw-semibold small"></label>
+                    <input asp-for="OwnerEmail" class="form-control rounded-3" placeholder="owner@restaurant.com" />
+                    <span asp-validation-for="OwnerEmail" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Password" class="form-label fw-semibold small"></label>
+                    <input asp-for="Password" class="form-control rounded-3" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-end gap-2">
+                <a asp-action="Index" class="btn btn-light rounded-pill px-4">Cancel</a>
+                <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold">
+                    <i class="bi bi-check2-circle me-1"></i>Submit Application
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var defaultLat = 33.8938;
+        var defaultLng = 35.5018;
+
+        var map = L.map('locationPickerMap').setView([defaultLat, defaultLng], 12);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
+
+        var searchInput = document.getElementById('mapSearchInput');
+        var dropdown = document.getElementById('searchResultsDropdown');
+        var statusEl = document.getElementById('searchStatus');
+
+        function setPin(lat, lng, zoomLevel, label) {
+            map.setView([lat, lng], zoomLevel || 16);
+            marker.setLatLng([lat, lng]);
+            document.getElementById('Latitude').value = lat.toFixed(6);
+            document.getElementById('Longitude').value = lng.toFixed(6);
+            document.getElementById('coordsDisplay').innerHTML =
+                '<span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>Pin saved: ' +
+                lat.toFixed(5) + ', ' + lng.toFixed(5) + '</span>';
+            if (label) {
+                statusEl.innerHTML = '<span class="text-success"><i class="bi bi-geo-fill me-1"></i>Selected: ' + label + '</span>';
+            }
+        }
+
+        setPin(defaultLat, defaultLng, 12, "");
+
+        marker.on('dragend', function () {
+            var pos = marker.getLatLng();
+            setPin(pos.lat, pos.lng, map.getZoom(), "");
+        });
+
+        map.on('click', function (e) {
+            setPin(e.latlng.lat, e.latlng.lng, map.getZoom(), "");
+            dropdown.style.display = 'none';
+        });
+
+        function tryParseGoogleMapsLink(text) {
+            var dMatch = text.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+            if (dMatch) return { lat: parseFloat(dMatch[1]), lng: parseFloat(dMatch[2]) };
+
+            var atIndex = text.indexOf(String.fromCharCode(64));
+            if (atIndex !== -1) {
+                var afterAt = text.substring(atIndex + 1);
+                var atMatch = afterAt.match(/^(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+                if (atMatch) return { lat: parseFloat(atMatch[1]), lng: parseFloat(atMatch[2]) };
+            }
+
+            var qMatch = text.match(/[?&](?:q|query|ll)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+            if (qMatch) return { lat: parseFloat(qMatch[1]), lng: parseFloat(qMatch[2]) };
+
+            var rawMatch = text.trim().match(/^(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)$/);
+            if (rawMatch) return { lat: parseFloat(rawMatch[1]), lng: parseFloat(rawMatch[2]) };
+
+            return null;
+        }
+
+        var debounceTimer;
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            var query = searchInput.value.trim();
+
+            var parsed = tryParseGoogleMapsLink(query);
+            if (parsed) {
+                dropdown.style.display = 'none';
+                setPin(parsed.lat, parsed.lng, 17, "Google Maps Coordinates Extracted!");
+                return;
+            }
+
+            if (query.length < 2) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            debounceTimer = setTimeout(function () { fetchSuggestions(query); }, 350);
+        });
+
+        async function fetchSuggestions(query) {
+            statusEl.innerHTML = '<span class="text-muted">Searching places & streets in Lebanon...</span>';
+            try {
+                var url = 'https://nominatim.openstreetmap.org/search?format=json&countrycodes=lb&limit=6&q=' + encodeURIComponent(query);
+                var res = await fetch(url);
+                var results = await res.json();
+
+                dropdown.innerHTML = '';
+
+                if (!results || results.length === 0) {
+                    dropdown.style.display = 'none';
+                    statusEl.innerHTML = '<span class="text-warning-emphasis">No exact match found. Try English spelling or paste a Google Maps link.</span>';
+                    return;
+                }
+
+                statusEl.innerHTML = '';
+                results.forEach(function (item) {
+                    var lat = parseFloat(item.lat);
+                    var lon = parseFloat(item.lon);
+                    var parts = item.display_name.split(',');
+                    var title = parts[0].trim();
+                    var sub = parts.slice(1, 4).join(',').trim();
+
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'list-group-item list-group-item-action text-start py-2';
+                    btn.innerHTML = '<div class="fw-semibold small text-dark"><i class="bi bi-geo-alt text-danger me-1"></i>' + title + '</div>' +
+                                    '<div class="text-muted" style="font-size: 0.75rem;">' + sub + '</div>';
+
+                    btn.addEventListener('click', function () {
+                        searchInput.value = title + (sub ? ' - ' + sub : '');
+                        dropdown.style.display = 'none';
+                        setPin(lat, lon, 16, title);
+                    });
+
+                    dropdown.appendChild(btn);
+                });
+
+                dropdown.style.display = 'block';
+            } catch (e) {
+                statusEl.innerHTML = '<span class="text-danger">Search unavailable. Paste a Google Maps link or click the map.</span>';
+            }
+        }
+
+        document.getElementById('mapSearchBtn').addEventListener('click', function () {
+            var q = searchInput.value.trim();
+            var parsed = tryParseGoogleMapsLink(q);
+            if (parsed) {
+                setPin(parsed.lat, parsed.lng, 17, "Google Maps Link Location");
+            } else if (q.length >= 2) {
+                fetchSuggestions(q);
+            }
+        });
+
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('mapSearchBtn').click();
+            }
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    });
+</script>

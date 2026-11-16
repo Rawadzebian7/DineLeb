@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Registration Submitted";
+}
+
+<div class="row justify-content-center my-5">
+    <div class="col-md-7 text-center">
+        <div class="card shadow-sm border-0 rounded-4 p-5">
+            <div class="mb-4">
+                <i class="bi bi-patch-check-fill text-success" style="font-size: 4rem;"></i>
+            </div>
+            <h2 class="fw-bold mb-3">Application Received Successfully</h2>
+            <p class="text-muted mb-4">
+                Your restaurant profile is currently <strong>Pending Commercial Verification</strong>.
+                To protect Lebanese dining standards and ensure authenticated ownership, all establishments undergo manual clearance before appearing publicly.
+            </p>
+            <div class="p-3 bg-light rounded-3 text-start small mb-4">
+                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-wallet2 me-2 text-danger"></i>Subscription & Activation Next Steps:</h6>
+                <ol class="mb-0 ps-3 text-secondary">
+                    <li>Our team reviews your Commercial Register documentation.</li>
+                    <li>We will reach out to your designated contact number regarding subscription activation (Whish Money / OMT).</li>
+                    <li>Once approved by admin, your profile unlocks on the public leaderboard and your incident response portal goes live.</li>
+                </ol>
+            </div>
+            <div>
+                <a asp-action="Index" class="btn btn-outline-dark px-4 rounded-pill fw-semibold">Return to Directory</a>
+            </div>
+        </div>
+    </div>
+</div>

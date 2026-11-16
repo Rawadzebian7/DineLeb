@@ -1,0 +1,228 @@
+﻿@{
+    ViewData["Title"] = "Lebanon's Restaurant Trust & Dispute Platform";
+    var activeCount = ViewBag.ActiveRestaurantsCount ?? 0;
+    var reviewsCount = ViewBag.TotalReviewsCount ?? 0;
+    var resolvedCount = ViewBag.ResolvedTicketsCount ?? 0;
+    var topRestaurants = ViewBag.TopRestaurants as List<DineLeb.Domain.Entities.Restaurant> ?? new List<DineLeb.Domain.Entities.Restaurant>();
+}
+
+<style>
+    /* Smooth Keyframe Animations */
+    @@keyframes fadeUp {
+        0% {
+            opacity: 0;
+            transform: translateY(28px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes floatSlow {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    @@keyframes pulseGlow {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.35);
+        }
+
+        50% {
+            box-shadow: 0 0 0 12px rgba(220, 53, 69, 0);
+        }
+    }
+
+    .anim-fade-1 {
+        animation: fadeUp 0.7s ease-out forwards;
+    }
+
+    .anim-fade-2 {
+        opacity: 0;
+        animation: fadeUp 0.7s ease-out 0.15s forwards;
+    }
+
+    .anim-fade-3 {
+        opacity: 0;
+        animation: fadeUp 0.7s ease-out 0.3s forwards;
+    }
+
+    .anim-float {
+        animation: floatSlow 4.5s ease-in-out infinite;
+    }
+
+    .btn-pulse {
+        animation: pulseGlow 2.5s infinite;
+    }
+
+    .hero-gradient {
+        background: radial-gradient(circle at top right, rgba(220, 53, 69, 0.08), transparent 50%), radial-gradient(circle at bottom left, rgba(25, 135, 84, 0.06), transparent 50%);
+    }
+
+    .feature-card {
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.08) !important;
+        }
+</style>
+
+<!-- Hero Section -->
+<section class="hero-gradient py-5 rounded-4 mb-5 border bg-white shadow-sm px-4 px-md-5 mt-3">
+    <div class="row align-items-center g-5 py-3">
+        <div class="col-lg-7">
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill mb-3 anim-fade-1">
+                <i class="bi bi-shield-check me-1"></i>Verified Lebanese Dining Ecosystem
+            </span>
+            <h1 class="display-5 fw-bold text-dark lh-sm mb-3 anim-fade-1">
+                Where Lebanese Diners & Restaurants Build <span class="text-danger">Real Trust.</span>
+            </h1>
+            <p class="lead text-muted mb-4 anim-fade-2">
+                Discover verified restaurants across Lebanon, share authentic reviews, and resolve service disputes privately before they damage a restaurant's reputation.
+            </p>
+            <div class="d-flex flex-wrap gap-3 anim-fade-3">
+                <a asp-controller="Restaurants" asp-action="Index" class="btn btn-danger btn-lg rounded-pill px-4 fw-semibold btn-pulse">
+                    <i class="bi bi-search me-2"></i>Explore Directory
+                </a>
+                <a asp-controller="Restaurants" asp-action="Register" class="btn btn-outline-dark btn-lg rounded-pill px-4 fw-semibold">
+                    <i class="bi bi-shop me-2"></i>Register Your Restaurant
+                </a>
+            </div>
+        </div>
+
+        <!-- Animated Floating Trust Card -->
+        <div class="col-lg-5 anim-fade-2">
+            <div class="card border-0 shadow-lg rounded-4 p-4 bg-white anim-float position-relative">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                            <i class="bi bi-patch-check-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Live Trust Index</h6>
+                            <small class="text-muted">Beirut • Byblos • Tripoli • Saida</small>
+                        </div>
+                    </div>
+                    <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1">Active</span>
+                </div>
+
+                <div class="p-3 bg-light rounded-3 mb-3 border">
+                    <div class="d-flex justify-content-between small fw-semibold mb-1">
+                        <span>Dispute Resolution Speed</span>
+                        <span class="text-success">98.4%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-success rounded-pill" style="width: 98.4%"></div>
+                    </div>
+                </div>
+
+                <div class="row g-2 text-center">
+                    <div class="col-4">
+                        <div class="p-2 border rounded-3 bg-white">
+                            <div class="h5 fw-bold text-dark mb-0">@activeCount</div>
+                            <small class="text-muted" style="font-size: 0.75rem;">Verified Spots</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 border rounded-3 bg-white">
+                            <div class="h5 fw-bold text-warning mb-0">@reviewsCount</div>
+                            <small class="text-muted" style="font-size: 0.75rem;">Real Reviews</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 border rounded-3 bg-white">
+                            <div class="h5 fw-bold text-success mb-0">@resolvedCount</div>
+                            <small class="text-muted" style="font-size: 0.75rem;">Resolved Tickets</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How DineLeb Works (3 Cards) -->
+<section class="mb-5">
+    <div class="text-center mb-4">
+        <h3 class="fw-bold">Built for Transparency & Accountability</h3>
+        <p class="text-muted">Three pillars protecting both Lebanese customers and hospitality owners.</p>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white feature-card">
+                <div class="bg-danger-subtle text-danger rounded-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 48px; height: 48px;">
+                    <i class="bi bi-building-check fs-4"></i>
+                </div>
+                <h5 class="fw-bold">Commercial Verification</h5>
+                <p class="text-muted small mb-0">
+                    Every partner restaurant is vetted by our Super Admin team using their official Lebanese Commercial Register number before going live.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white feature-card">
+                <div class="bg-warning-subtle text-warning-emphasis rounded-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 48px; height: 48px;">
+                    <i class="bi bi-chat-square-heart fs-4"></i>
+                </div>
+                <h5 class="fw-bold">Private Dispute Mediation</h5>
+                <p class="text-muted small mb-0">
+                    Had an issue with your order? Open a private ticket directly with restaurant management to resolve it fairly and boost their Trust Score.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white feature-card">
+                <div class="bg-success-subtle text-success rounded-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 48px; height: 48px;">
+                    <i class="bi bi-trophy fs-4"></i>
+                </div>
+                <h5 class="fw-bold">Live Trust Leaderboard</h5>
+                <p class="text-muted small mb-0">
+                    Rankings are driven by verified diner ratings and ticket resolution speed—rewarding restaurants that genuinely care about service.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Top Rated Showcase (If Restaurants Exist) -->
+@if (topRestaurants.Any())
+{
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold mb-0"><i class="bi bi-stars text-warning me-2"></i>Top Trusted Restaurants</h4>
+            <a asp-controller="Restaurants" asp-action="Leaderboard" class="btn btn-sm btn-outline-danger rounded-pill px-3">View Full Leaderboard</a>
+        </div>
+        <div class="row g-4">
+            @foreach (var r in topRestaurants)
+            {
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white feature-card">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="fw-bold mb-0">@r.Name</h5>
+                            <span class="badge bg-warning-subtle text-dark border border-warning rounded-pill">
+                                <i class="bi bi-star-fill text-warning me-1"></i>@r.AverageRating.ToString("0.0")
+                            </span>
+                        </div>
+                        <small class="text-muted mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i>@r.City — @r.Address</small>
+                        <p class="small text-muted mb-3">@r.Description</p>
+                        <div class="mt-auto d-flex justify-content-between align-items-center pt-2 border-top">
+                            <span class="small text-success fw-semibold">
+                                <i class="bi bi-check2-circle me-1"></i>@r.ResolvedTicketsCount / @r.TotalTicketsCount Resolved
+                            </span>
+                            <a asp-controller="Restaurants" asp-action="Details" asp-route-id="@r.Id" class="btn btn-sm btn-dark rounded-pill px-3">View</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
